@@ -1,13 +1,16 @@
 package com.testgame.wall_and_cannons_server.domain;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.List;
 
+@Data
 @Entity
-public class User {
+@Table
+public class PlayerUser {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(nullable = false)
     private Long id;
 
@@ -20,7 +23,6 @@ public class User {
     @Column
     private String password;
 
-    @Column
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "playerUser")
     private List<Castle> castle;
 }
