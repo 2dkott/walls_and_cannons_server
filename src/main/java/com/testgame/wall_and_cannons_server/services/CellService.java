@@ -6,6 +6,8 @@ import com.testgame.wall_and_cannons_server.persistance.CellRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class CellService {
 
@@ -29,5 +31,9 @@ public class CellService {
             }
         }
         return wall;
+    }
+
+    public List<Cell> getCellsByWall(long wallId) {
+        return cellRepository.findAll().stream().filter(cell -> cell.getWall().getId()==wallId).toList();
     }
 }
