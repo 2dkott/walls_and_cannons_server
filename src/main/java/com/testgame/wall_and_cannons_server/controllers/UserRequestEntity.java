@@ -5,7 +5,7 @@ import com.testgame.wall_and_cannons_server.domain.PlayerUser;
 import lombok.Data;
 
 @Data
-public class UserRequestBody {
+public class UserRequestEntity {
 
     @JsonProperty("id")
     private Long id;
@@ -16,9 +16,9 @@ public class UserRequestBody {
     @JsonProperty("login_name")
     private String loginName;
 
-    public UserRequestBody() {}
+    public UserRequestEntity() {}
 
-    public UserRequestBody(PlayerUser user) {
+    public UserRequestEntity(PlayerUser user) {
         this.id = user.getId();
         this.gameName = user.getGameName();
         this.loginName = user.getLoginName();

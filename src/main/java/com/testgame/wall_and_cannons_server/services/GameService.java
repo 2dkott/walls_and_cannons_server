@@ -1,11 +1,10 @@
 package com.testgame.wall_and_cannons_server.services;
 
-import com.testgame.wall_and_cannons_server.controllers.UserRequestBody;
+import com.testgame.wall_and_cannons_server.controllers.UserRequestEntity;
 import com.testgame.wall_and_cannons_server.domain.Castle;
 import com.testgame.wall_and_cannons_server.domain.PlayerUser;
 import com.testgame.wall_and_cannons_server.domain.Wall;
 import com.testgame.wall_and_cannons_server.persistance.CastleRepository;
-import com.testgame.wall_and_cannons_server.persistance.CellRepository;
 import com.testgame.wall_and_cannons_server.persistance.UserRepository;
 import com.testgame.wall_and_cannons_server.persistance.WallRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ public class GameService {
     CellService cellService;
 
 
-    public UserRequestBody createNewPlayer(UserRequestBody newUser) {
+    public UserRequestEntity createNewPlayer(UserRequestEntity newUser) {
         PlayerUser user = userRepository.save(newUser.mapToPlayerUser());
 
         Wall wall = new Wall();
@@ -41,6 +40,6 @@ public class GameService {
         castle.setWall(wall);
         castleRepository.save(castle);
 
-        return new UserRequestBody(user);
+        return new UserRequestEntity(user);
     }
 }

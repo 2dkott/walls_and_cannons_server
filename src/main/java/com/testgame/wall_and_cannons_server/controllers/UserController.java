@@ -29,14 +29,13 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<UserRequestBody> addUser(@RequestBody UserRequestBody userRequestBody) {
-
-        return new ResponseEntity<>(gameService.createNewPlayer(userRequestBody), headers, HttpStatus.CREATED);
+    public ResponseEntity<UserRequestEntity> addUser(@RequestBody UserRequestEntity userRequestEntity) {
+        return new ResponseEntity<>(gameService.createNewPlayer(userRequestEntity), headers, HttpStatus.CREATED);
     }
 
     @GetMapping()
-    public ResponseEntity<List<PlayerUser>> getAllUser() {
-        List<PlayerUser> users = userRepository.findAll();
+    public ResponseEntity<List<UserRequestEntity>> getAllUser() {
+        List<UserRequestEntity> users = userRepository.findAll().stream().map(user -> new UserRequestEntity(user)).toList();
         return new ResponseEntity<>(users, headers, HttpStatus.FOUND);
     }
 }
