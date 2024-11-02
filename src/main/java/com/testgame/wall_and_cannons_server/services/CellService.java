@@ -25,7 +25,7 @@ public class CellService {
             for(int j = 0; j < temp_columns; j++) {
                 Cell cell = new Cell();
                 cell.setCellRow(i);
-                cell.setCellRow(j);
+                cell.setCellColumn(j);
                 cell.setWall(wall);
                 cellRepository.save(cell);
             }
