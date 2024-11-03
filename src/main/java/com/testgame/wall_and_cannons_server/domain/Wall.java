@@ -20,6 +20,10 @@ public class Wall {
     @Column
     private int wallColumns;
 
+    @OneToOne()
+    @JoinColumn(unique = true, nullable = false)
+    private Castle castle;
+
     @Column
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "wall")
     private List<Cell> cellList;
