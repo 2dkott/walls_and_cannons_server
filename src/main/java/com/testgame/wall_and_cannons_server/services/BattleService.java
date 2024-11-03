@@ -1,9 +1,9 @@
 package com.testgame.wall_and_cannons_server.services;
 
 import com.testgame.wall_and_cannons_server.domain.Battle;
-import com.testgame.wall_and_cannons_server.domain.BattleCell;
+import com.testgame.wall_and_cannons_server.domain.BattleRoundCell;
 import com.testgame.wall_and_cannons_server.domain.Castle;
-import com.testgame.wall_and_cannons_server.persistance.Repository;
+import com.testgame.wall_and_cannons_server.persistance.BattleCellRepository;
 import com.testgame.wall_and_cannons_server.persistance.BattleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ public class BattleService {
     private BattleRepository battleRepository;
 
     @Autowired
-    private Repository battleCellRepostitory;
+    private BattleCellRepository battleCellRepostitory;
 
     @Autowired
     private CastleService castleService;
@@ -28,9 +28,11 @@ public class BattleService {
         battle.setPlayerUserB(castleB.getPlayerUser());
         battleRepository.save(battle);
 
-        List<BattleCell> battleCells = castleA.getWall().getCellList().stream()
-                .map(cell -> new BattleCell(battle, cell)).toList();
-        battleCellRepostitory.saveAll(battleCells);
+        List<BattleRoundCell> battleRoundCells = castleA.getWall().getCellList().stream()
+                .map(cell -> new BattleRoundCell(battle, cell)).toList();
+        battleCellRepostitory.saveAll(battleRoundCells);
+
+
 
         return battle;
     }

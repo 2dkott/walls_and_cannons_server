@@ -3,10 +3,12 @@ package com.testgame.wall_and_cannons_server.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Entity
-@Table
-public class Castle {
+@Table(name = "battle_round")
+public class BattleRound {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -14,14 +16,10 @@ public class Castle {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "PlayerUser_id", nullable = false)
-    private PlayerUser playerUser;
-
-    @OneToOne()
-    @JoinColumn(unique = true, nullable = false)
-    private Wall wall;
+    @JoinColumn(name = "Battle_id", nullable = false)
+    private Battle battle;
 
     @Column
-    private boolean isCurrent;
-
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "battleRound")
+    private List<BattleRoundCell> battleRoundCells;
 }

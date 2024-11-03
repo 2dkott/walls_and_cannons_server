@@ -6,26 +6,26 @@ import lombok.Data;
 @Data
 @Entity
 @Table
-public class BattleCell {
-
-    public BattleCell() {
-        isHit = false;
-    }
-
-    public BattleCell(Battle battle, Cell cell) {
-        this();
-        this.battle = battle;
-        this.cell = cell;
-    }
+public class BattleRoundCell {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(nullable = false)
     private Long id;
 
+    public BattleRoundCell() {
+        isHit = false;
+    }
+
+    public BattleRoundCell(BattleRound battleRound, Cell cell) {
+        this();
+        this.battleRound = battleRound;
+        this.cell = cell;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "Battle_id", nullable = false)
-    private Battle battle;
+    @JoinColumn(name = "battle_round_id", nullable = false)
+    public BattleRound battleRound;
 
     @OneToOne()
     @JoinColumn(unique = true, nullable = false)
