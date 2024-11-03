@@ -1,0 +1,37 @@
+package com.testgame.wall_and_cannons_server.services;
+
+import com.testgame.wall_and_cannons_server.domain.Battle;
+import com.testgame.wall_and_cannons_server.domain.BattleCell;
+import com.testgame.wall_and_cannons_server.domain.Castle;
+import com.testgame.wall_and_cannons_server.persistance.Repository;
+import com.testgame.wall_and_cannons_server.persistance.BattleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public class BattleService {
+
+    @Autowired
+    private BattleRepository battleRepository;
+
+    @Autowired
+    private Repository battleCellRepostitory;
+
+    @Autowired
+    private CastleService castleService;
+
+    public Battle createBattle(Castle castleA, Castle castleB) {
+        Battle battle = new Battle();
+        battle.setPlayerUserA(castleA.getPlayerUser());
+        battle.setPlayerUserB(castleB.getPlayerUser());
+        battleRepository.save(battle);
+
+        List<BattleCell> battleCells = castleA.getWall().getCellList().stream()
+                .map(cell -> new BattleCell(battle, cell)).toList();
+        battleCellRepostitory.saveAll(battleCells);
+
+        return battle;
+    }
+}
