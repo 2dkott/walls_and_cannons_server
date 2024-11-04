@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class CastleService {
@@ -16,5 +17,9 @@ public class CastleService {
 
     public List<Castle> getAllCastlesByUserId(PlayerUser playerUser) {
         return castleRepository.findByPlayerUser(playerUser);
+    }
+
+    public Optional<Castle> getCurrentCastleByUser(PlayerUser playerUser) {
+        return castleRepository.findCastleByPlayerUserAndAndCurrentIsTrue(playerUser);
     }
 }
