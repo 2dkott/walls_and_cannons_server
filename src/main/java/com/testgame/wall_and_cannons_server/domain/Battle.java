@@ -22,5 +22,10 @@ public class Battle {
     public PlayerUser playerUserB;
 
     @Column
-    public int result;
+    public int isFinished;
+
+    @OneToOne()
+    @JoinColumn(unique = true, nullable = false)
+    private PlayerUser winner;
+
 }
