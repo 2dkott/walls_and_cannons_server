@@ -3,6 +3,9 @@ package com.testgame.wall_and_cannons_server.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+import java.util.Optional;
+
 @Data
 @Entity
 @Table
@@ -13,19 +16,25 @@ public class Battle {
     @Column(nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "PlayerUser_id", nullable = false)
-    private PlayerUser playerUserA;
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "PlayerUser_id", nullable = false)
-    public PlayerUser playerUserB;
+    @Column
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "battle")
+    private List<PlayerParty> playerParties;
 
     @Column
-    public int isFinished;
+    public boolean isFinished;
 
     @OneToOne()
     @JoinColumn(unique = true, nullable = false)
     private PlayerUser winner;
+
+    public Optional<PlayerParty> getPartyByPlayer(PlayerUser playerUser) {
+        List<PlayerParty> listWIthPlayer = playerParties.stream()
+                .filter(playerParty -> playerParty.getPlayerUser().equals(playerUser)).toList();
+        return listWIthPlayer.isEmpty() ? Optional.empty() : Optional.ofNullable(listWIthPlayer.get(0));
+    }
+
+    public boolean isByPlayer(PlayerUser playerUser) {
+        return !playerParties.stream().filter(playerParty -> playerParty.getPlayerUser().equals(playerUser)).toList().isEmpty();
+    }
 
 }
