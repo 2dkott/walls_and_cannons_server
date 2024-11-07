@@ -13,23 +13,18 @@ public class ActiveUserProvider {
 
     List<PlayerUser> activePlayers = new ArrayList<>();
 
-    public Optional<PlayerUser> findUser() {
-        if (isUserListEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(UserSelector.getRandomUser(activePlayers));
+    public List<PlayerUser> getActivePlayers() {
+        return activePlayers;
     }
 
     public boolean isUserListEmpty() {
         return activePlayers.isEmpty();
     }
 
-}
-
-class UserSelector {
-
-    public static PlayerUser getRandomUser(List<PlayerUser> playerUserList) {
-        return playerUserList.get(new Random().nextInt(playerUserList.size()));
+    public void addUser(PlayerUser user) {
+        activePlayers.add(user);
     }
 
 }
+
+
