@@ -15,10 +15,21 @@ public class BattleService {
     private BattleRepository battleRepository;
 
     public List<Battle> getBattlesByPlayerUser(PlayerUser playerUser, boolean isConfirmed, boolean isFinished) {
-        return battleRepository.findAll().stream()
+        return getBattlesByPlayerUser(playerUser).stream()
                 .filter(battle -> battle.isFinished == isFinished)
-                .filter(battle -> battle.isByPlayer(playerUser))
                 .filter(battle -> battle.getPartyByPlayer(playerUser).get().isConfirmed() == isConfirmed)
+                .toList();
+    }
+
+    public List<Battle> getActiveBattlesByPlayer(PlayerUser playerUser) {
+        return getBattlesByPlayerUser(playerUser).stream()
+                .filter(battle -> !battle.isFinished)
+                .toList();
+    }
+
+    public List<Battle> getBattlesByPlayerUser(PlayerUser playerUser) {
+        return battleRepository.findAll().stream()
+                .filter(battle -> battle.isByPlayer(playerUser))
                 .toList();
     }
 }

@@ -25,22 +25,7 @@ public class BattleServiceTest {
     @InjectMocks
     BattleService battleService;
 
-    PlayerUser playerUserA = new PlayerUser();
-    PlayerUser playerUserB = new PlayerUser();
-
     private static Long idIncrement = 0L;
-
-    public BattleServiceTest() {
-        playerUserA.setId(1L);
-        playerUserA.setLoginName("TestLoginName");
-        playerUserA.setPassword("TestPassword");
-        playerUserA.setGameName("TestGameName");
-
-        playerUserB.setId(2L);
-        playerUserB.setLoginName("TestLoginName");
-        playerUserB.setPassword("TestPassword");
-        playerUserB.setGameName("TestGameName");
-    }
 
     private static PlayerParty createPlayerParty(PlayerUser playerUser, boolean isConfirmed) {
         PlayerParty playerParty = new PlayerParty();
@@ -63,6 +48,7 @@ public class BattleServiceTest {
         PlayerUser userA = createPlayerUser();
         PlayerUser userB = createPlayerUser();
         PlayerUser userC = createPlayerUser();
+
         PlayerParty playerPartyAC = createPlayerParty(userA, true);
         PlayerParty playerPartyAUNC = createPlayerParty(userA, false);
         PlayerParty playerPartyB = createPlayerParty(userB, false);
@@ -127,11 +113,63 @@ public class BattleServiceTest {
                 Arguments.of("There are no battle with player", userA, true, true, List.of(battleB), List.of()));
     }
 
+    private static Stream<Arguments> createActiveBattles() {
+        PlayerUser userA = createPlayerUser();
+        PlayerUser userB = createPlayerUser();
+        PlayerUser userC = createPlayerUser();
+
+        PlayerParty playerPartyAC = createPlayerParty(userA, true);
+        PlayerParty playerPartyAUNC = createPlayerParty(userA, false);
+        PlayerParty playerPartyB = createPlayerParty(userB, false);
+        PlayerParty playerPartyC = createPlayerParty(userC, false);
+
+        Battle activeBattleAForUserA = new Battle();
+        activeBattleAForUserA.setPlayerParties(List.of(playerPartyAC, playerPartyB, playerPartyC));
+        activeBattleAForUserA.setFinished(false);
+        activeBattleAForUserA.setWinner(null);
+        activeBattleAForUserA.setId(idIncrement++);
+
+        Battle activeBattleBForUserA = new Battle();
+        activeBattleBForUserA.setPlayerParties(List.of(playerPartyAUNC, playerPartyB, playerPartyC));
+        activeBattleBForUserA.setFinished(false);
+        activeBattleBForUserA.setWinner(null);
+        activeBattleBForUserA.setId(idIncrement++);
+
+        Battle finishedBattleForUserA = new Battle();
+        finishedBattleForUserA.setPlayerParties(List.of(playerPartyAUNC, playerPartyB, playerPartyC));
+        finishedBattleForUserA.setFinished(true);
+        finishedBattleForUserA.setWinner(null);
+        finishedBattleForUserA.setId(idIncrement++);
+
+        Battle activeBattleWithoutUserA = new Battle();
+        activeBattleWithoutUserA.setPlayerParties(List.of(playerPartyB, playerPartyC));
+        activeBattleWithoutUserA.setFinished(false);
+        activeBattleWithoutUserA.setWinner(null);
+        activeBattleWithoutUserA.setId(idIncrement++);
+
+        return Stream.of(
+                Arguments.of("There is one active battle with player",
+                        userA,
+                        List.of(activeBattleAForUserA, finishedBattleForUserA, activeBattleWithoutUserA),
+                        List.of(activeBattleAForUserA)),
+                Arguments.of("There is finished battle with player",
+                        userA,
+                        List.of(finishedBattleForUserA, activeBattleWithoutUserA),
+                        List.of()));
+    }
+
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("createBattles")
     public void testFindAllCurrentBattlesByPlayer(String name, PlayerUser playerUser, boolean isConfirmed, boolean isFinished, List<Battle> allBattles, List<Battle> expectedBattles) {
         Mockito.when(battleRepository.findAll()).thenReturn(allBattles);
         assert expectedBattles.equals(battleService.getBattlesByPlayerUser(playerUser, isConfirmed, isFinished));
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("createActiveBattles")
+    public void testFindActiveBattleByPlayer(String name, PlayerUser playerUser, List<Battle> allBattles, List<Battle> expectedBattles) {
+        Mockito.when(battleRepository.findAll()).thenReturn(allBattles);
+        assert expectedBattles.equals(battleService.getActiveBattlesByPlayer(playerUser));
     }
 
 }
