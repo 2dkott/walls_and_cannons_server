@@ -15,7 +15,7 @@ public class CastleService {
     @Autowired
     private CastleRepository castleRepository;
 
-    public List<Castle> getAllCastlesByUserId(PlayerUser playerUser) {
+    public List<Castle> getAllCastlesByUser(PlayerUser playerUser) {
         return castleRepository.findByPlayerUser(playerUser);
     }
 
