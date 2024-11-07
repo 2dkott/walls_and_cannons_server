@@ -3,7 +3,7 @@ package com.testgame.wall_and_cannons_server.controllers;
 import com.testgame.wall_and_cannons_server.domain.PlayerUser;
 import com.testgame.wall_and_cannons_server.exceptions.NoUserFoundException;
 import com.testgame.wall_and_cannons_server.services.ActiveUserProvider;
-import com.testgame.wall_and_cannons_server.services.BattleMatcher;
+import com.testgame.wall_and_cannons_server.domain.BattleMatcher;
 import com.testgame.wall_and_cannons_server.services.BattleService;
 import com.testgame.wall_and_cannons_server.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,29 +1,28 @@
-package com.testgame.wall_and_cannons_server.services;
+package com.testgame.wall_and_cannons_server.domain;
 
-import com.testgame.wall_and_cannons_server.domain.Battle;
-import com.testgame.wall_and_cannons_server.domain.PlayerUser;
-import com.testgame.wall_and_cannons_server.exceptions.ActiveUserListEmptyException;
-import com.testgame.wall_and_cannons_server.domain.PlayerParty;
+import com.testgame.wall_and_cannons_server.services.ActiveUserProvider;
+import com.testgame.wall_and_cannons_server.services.BattleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-@Component
+
 public class BattleMatcher {
 
-    ActiveUserProvider activeUserProvider;
-    BattleService battleService;
+    private final Supplier<List<PlayerUser>> playerUserProvider;
+    private final Function<PlayerUser, List<Battle>> battleListProvider;
 
-    @Autowired
-    public BattleMatcher(BattleService battleService, ActiveUserProvider activeUserProvider) {
-        this.battleService = battleService;
-        this.activeUserProvider = activeUserProvider;
+    public BattleMatcher(Supplier<List<PlayerUser>> playerUserProvider, Function<PlayerUser, List<Battle>> battleListProvider) {
+        this.battleListProvider = battleListProvider;
+        this.playerUserProvider = playerUserProvider;
     }
 
-    public Optional<Battle> match(PlayerUser playerUser) throws ActiveUserListEmptyException {
+    public Optional<Battle> match(PlayerUser playerUser) {
 
         Optional<PlayerUser> enemyPlayer = findRandomPlayerWithoutBattleExcluding(playerUser);
 
@@ -46,10 +45,12 @@ public class BattleMatcher {
         return Optional.empty();
     }
 
+
+
     public Optional<PlayerUser> findRandomPlayerWithoutBattleExcluding(PlayerUser currentPlayer) {
-        List<PlayerUser> noBattlePlayers = activeUserProvider.getActivePlayers().stream()
+        List<PlayerUser> noBattlePlayers = playerUserProvider.get().stream()
                 .filter(player -> !player.equals(currentPlayer))
-                .filter(playerUser -> battleService.getActiveBattlesByPlayer(playerUser).isEmpty())
+                .filter(playerUser -> battleListProvider.apply(playerUser).isEmpty())
                 .toList();
 
         if (noBattlePlayers.isEmpty()) return Optional.empty();
