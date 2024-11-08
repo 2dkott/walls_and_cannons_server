@@ -1,23 +1,17 @@
 package com.testgame.wall_and_cannons_server.domain;
 
-import com.testgame.wall_and_cannons_server.services.ActiveUserProvider;
-import com.testgame.wall_and_cannons_server.services.BattleService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 
 public class BattleMatcher {
 
     private final Supplier<List<PlayerUser>> playerUserProvider;
-    private final Function<PlayerUser, List<Battle>> battleListProvider;
+    private final Supplier<List<Battle>> battleListProvider;
 
-    public BattleMatcher(Supplier<List<PlayerUser>> playerUserProvider, Function<PlayerUser, List<Battle>> battleListProvider) {
+    public BattleMatcher(Supplier<List<PlayerUser>> playerUserProvider, Supplier<List<Battle>> battleListProvider) {
         this.battleListProvider = battleListProvider;
         this.playerUserProvider = playerUserProvider;
     }
@@ -45,12 +39,18 @@ public class BattleMatcher {
         return Optional.empty();
     }
 
+    public List<Battle> getBattlesByPlayer(List<Battle> battleList, PlayerUser playerUser) {
+        return battleList.stream().filter(battle -> battle.isByPlayer(playerUser)).toList();
+    }
 
+    public List<Battle> getActiveBattlesByPlayer(List<Battle> battleList, PlayerUser playerUser) {
+        return getBattlesByPlayer(battleList, playerUser).stream().filter(battle -> !battle.isFinished()).toList();
+    }
 
     public Optional<PlayerUser> findRandomPlayerWithoutBattleExcluding(PlayerUser currentPlayer) {
         List<PlayerUser> noBattlePlayers = playerUserProvider.get().stream()
                 .filter(player -> !player.equals(currentPlayer))
-                .filter(playerUser -> battleListProvider.apply(playerUser).isEmpty())
+                .filter(player -> getActiveBattlesByPlayer(battleListProvider.get(), player).isEmpty())
                 .toList();
 
         if (noBattlePlayers.isEmpty()) return Optional.empty();
