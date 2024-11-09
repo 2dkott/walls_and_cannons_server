@@ -18,12 +18,12 @@ public class BattleMatcher {
         this.playerUserProvider = playerUserProvider;
     }
 
-    public Optional<Battle> match(PlayerUser playerUser) {
+    public Optional<MatchingResult> match(PlayerUser playerUser) {
         log.info("Matching {} with another active player", playerUser);
         Optional<PlayerUser> enemyPlayer = findRandomPlayerWithoutBattleExcluding(playerUser);
 
         if (enemyPlayer.isPresent()) {
-            log.info("{} player matched with initial {}}", enemyPlayer, playerUser);
+            log.info("{} player matched with initial {}}", enemyPlayer.get(), playerUser);
 
             Battle battle = new Battle();
 
@@ -37,7 +37,9 @@ public class BattleMatcher {
 
             battle.setPlayerParties(List.of(playerParty, enemyPlayerParty));
             log.info("{} is created", battle);
-            return Optional.of(battle);
+
+
+            return Optional.of(new MatchingResult(playerUser, enemyPlayer.get(), battle));
         }
         log.info("There is no available active players fo initial {}}", playerUser);
         return Optional.empty();
