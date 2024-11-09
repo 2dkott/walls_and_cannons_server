@@ -25,4 +25,9 @@ public class PlayerUser {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "playerUser")
     private List<Castle> castle;
+
+    @Override
+    public String toString() {
+        return "Player [id=" + id + ", loginName=" + loginName + ", gameName=" + gameName + "]";
+    }
 }

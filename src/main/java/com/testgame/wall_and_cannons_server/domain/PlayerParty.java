@@ -22,4 +22,9 @@ public class PlayerParty {
     private Battle battle;
 
     private boolean isConfirmed;
+
+    @Override
+    public String toString() {
+        return "Party [id=" + id + ", playerUser=" + playerUser + "]";
+    }
 }
