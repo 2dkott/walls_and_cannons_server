@@ -31,8 +31,7 @@ public class BattleMatcher {
             enemyPlayerParty.setPlayerUser(enemyPlayer.get());
             enemyPlayerParty.setConfirmed(false);
 
-            battle.getPlayerParties().add(playerParty);
-            battle.getPlayerParties().add(enemyPlayerParty);
+            battle.setPlayerParties(List.of(playerParty, enemyPlayerParty));
 
             return Optional.of(battle);
         }
