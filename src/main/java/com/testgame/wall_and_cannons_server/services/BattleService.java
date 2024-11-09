@@ -32,4 +32,8 @@ public class BattleService {
                 .filter(battle -> battle.isByPlayer(playerUser))
                 .toList();
     }
+
+    public List<Battle> findAllBattles() {
+        return battleRepository.findAll();
+    }
 }
