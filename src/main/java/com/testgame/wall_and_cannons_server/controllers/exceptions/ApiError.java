@@ -1,4 +1,4 @@
-package com.testgame.wall_and_cannons_server.controllers;
+package com.testgame.wall_and_cannons_server.controllers.exceptions;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
