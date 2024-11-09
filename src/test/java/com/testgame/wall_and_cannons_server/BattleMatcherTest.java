@@ -1,11 +1,8 @@
 package com.testgame.wall_and_cannons_server;
 
-import com.testgame.wall_and_cannons_server.domain.Battle;
-import com.testgame.wall_and_cannons_server.domain.PlayerParty;
-import com.testgame.wall_and_cannons_server.domain.PlayerUser;
+import com.testgame.wall_and_cannons_server.domain.*;
 import com.testgame.wall_and_cannons_server.persistance.BattleRepository;
 import com.testgame.wall_and_cannons_server.services.ActiveUserProvider;
-import com.testgame.wall_and_cannons_server.domain.BattleMatcher;
 import com.testgame.wall_and_cannons_server.services.BattleService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -160,9 +157,11 @@ public class BattleMatcherTest {
         expectedBattleAC.setFinished(false);
         expectedBattleAC.setWinner(null);
 
+        MatchingResult matchingResult = new MatchingResult(userA, userC, expectedBattleAC);
+
         return Stream.of(
                 Arguments.of("There is no available players", userA, List.of(userA, userB, userC), List.of(battleAC, battleBC, finishedBattleAC), Optional.empty()),
-                Arguments.of("There is available player", userA, List.of(userA, userB, userC), List.of(finishedBattleAC, battleBD), Optional.of(expectedBattleAC)));
+                Arguments.of("There is available player", userA, List.of(userA, userB, userC), List.of(finishedBattleAC, battleBD), Optional.of(matchingResult)));
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -190,11 +189,11 @@ public class BattleMatcherTest {
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("prepareMatch")
-    public void testMatch(String name, PlayerUser playerUser, List<PlayerUser> activeUsers, List<Battle> allBattles, Optional<Battle> expectedBattle) {
+    public void testMatch(String name, PlayerUser playerUser, List<PlayerUser> activeUsers, List<Battle> allBattles, Optional<MatchingResult> expectedMatchingResult) {
         Mockito.when(battleRepository.findAll()).thenReturn(allBattles);
         Mockito.when(activeUserProvider.getActivePlayers()).thenReturn(activeUsers);
-        Optional<Battle> actualBattle = battleMatcher.match(playerUser);
-        assert actualBattle.equals(expectedBattle);
+        Optional<MatchingResult> actualMatchingResult = battleMatcher.match(playerUser);
+        assert actualMatchingResult.equals(expectedMatchingResult);
     }
 
 }
