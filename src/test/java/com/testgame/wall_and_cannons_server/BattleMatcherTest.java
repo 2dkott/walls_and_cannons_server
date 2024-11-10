@@ -1,10 +1,13 @@
 package com.testgame.wall_and_cannons_server;
 
-import com.testgame.wall_and_cannons_server.domain.*;
+import com.testgame.wall_and_cannons_server.domain.Battle;
+import com.testgame.wall_and_cannons_server.domain.BattleMatcher;
+import com.testgame.wall_and_cannons_server.domain.MatchingResult;
+import com.testgame.wall_and_cannons_server.domain.PlayerParty;
+import com.testgame.wall_and_cannons_server.domain.PlayerUser;
 import com.testgame.wall_and_cannons_server.persistance.BattleRepository;
 import com.testgame.wall_and_cannons_server.services.ActiveUserProvider;
 import com.testgame.wall_and_cannons_server.services.BattleService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,8 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class BattleMatcherTest {
