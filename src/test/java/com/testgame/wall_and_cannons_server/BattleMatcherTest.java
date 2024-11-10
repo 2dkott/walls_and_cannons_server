@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 public class BattleMatcherTest {
 
@@ -193,7 +196,12 @@ public class BattleMatcherTest {
         Mockito.when(battleRepository.findAll()).thenReturn(allBattles);
         Mockito.when(activeUserProvider.getActivePlayers()).thenReturn(activeUsers);
         Optional<MatchingResult> actualMatchingResult = battleMatcher.match(playerUser);
-        assert actualMatchingResult.equals(expectedMatchingResult);
+        assert actualMatchingResult.isEmpty()==expectedMatchingResult.isEmpty();
+        expectedMatchingResult.ifPresent(matchingResult -> assertAll(
+                () -> assertEquals(actualMatchingResult.get().getBattle(), matchingResult.getBattle()),
+                () -> assertEquals(actualMatchingResult.get().getMatchedPlayer(), matchingResult.getMatchedPlayer()),
+                () -> assertEquals(actualMatchingResult.get().getInitPlayer(), matchingResult.getInitPlayer())
+        ));
     }
 
 }
