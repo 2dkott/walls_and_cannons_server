@@ -7,7 +7,6 @@ public class CastleRequestEntity {
 
     public CastleRequestEntity(Castle castle) {
         this.id = castle.getId();
-        this.wallId = castle.getWall().getId();
         this.userId = castle.getPlayerUser().getId();
     }
 
@@ -16,8 +15,4 @@ public class CastleRequestEntity {
 
     @JsonProperty("user_id")
     public long userId;
-
-    @JsonProperty("wall_id")
-    public long wallId;
-
 }
