@@ -36,4 +36,8 @@ public class BattleService {
     public List<Battle> findAllBattles() {
         return battleRepository.findAll();
     }
+
+    public Battle saveBattle(Battle battle) {
+        return battleRepository.save(battle);
+    }
 }
