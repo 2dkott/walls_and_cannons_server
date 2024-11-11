@@ -20,6 +20,7 @@ public class CastleService {
     }
 
     public Optional<Castle> getCurrentCastleByUser(PlayerUser playerUser) {
-        return castleRepository.findCastleByPlayerUserAndAndCurrentIsTrue(playerUser);
+        List<Castle> castleList = castleRepository.findByPlayerUser(playerUser);
+        return castleList.stream().filter(Castle::isCurrent).findFirst();
     }
 }
