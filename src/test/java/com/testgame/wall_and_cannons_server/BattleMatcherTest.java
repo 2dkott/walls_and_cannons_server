@@ -72,67 +72,6 @@ public class BattleMatcherTest {
         return playerUser;
     }
 
-    private static Stream<Arguments> createBattles() {
-        Battle battleBC = new Battle();
-        battleBC.setPlayerParties(List.of(playerPartyB, playerPartyC));
-        battleBC.setFinished(false);
-        battleBC.setWinner(null);
-        battleBC.setId(idIncrement++);
-
-        Battle battleBD = new Battle();
-        battleBD.setPlayerParties(List.of(playerPartyB, playerPartyD));
-        battleBD.setFinished(true);
-        battleBD.setWinner(null);
-        battleBD.setId(idIncrement++);
-
-        return Stream.of(
-                Arguments.of("There is no active battle with player", userA, List.of(userA, userB, userC, userD), List.of(battleBC), Optional.of(userD)),
-                Arguments.of("There is one finished battle with player", userA, List.of(userA, userB, userC, userD), List.of(battleBC, battleBD), Optional.of(userD)),
-                Arguments.of("There is one finished battle with player", userA, List.of(userA, userB, userC), List.of(battleBC), Optional.empty()));
-    }
-
-    public static Stream<Arguments> createBattlesForUser() {
-        Battle battleBC = new Battle();
-        battleBC.setPlayerParties(List.of(playerPartyB, playerPartyC));
-        battleBC.setFinished(false);
-        battleBC.setWinner(null);
-        battleBC.setId(idIncrement++);
-
-        Battle battleAC = new Battle();
-        battleAC.setPlayerParties(List.of(playerPartyA, playerPartyC));
-        battleAC.setFinished(false);
-        battleAC.setWinner(null);
-        battleAC.setId(idIncrement++);
-
-        return Stream.of(
-                Arguments.of("There is no battle with player", userA, List.of(battleBC), List.of()),
-                Arguments.of("There is one battle with player", userA, List.of(battleAC, battleBC), List.of(battleAC)));
-    }
-
-    public static Stream<Arguments> createActiveBattlesForUser() {
-        Battle battleBC = new Battle();
-        battleBC.setPlayerParties(List.of(playerPartyB, playerPartyC));
-        battleBC.setFinished(false);
-        battleBC.setWinner(null);
-        battleBC.setId(idIncrement++);
-
-        Battle battleAC = new Battle();
-        battleAC.setPlayerParties(List.of(playerPartyA, playerPartyC));
-        battleAC.setFinished(false);
-        battleAC.setWinner(null);
-        battleAC.setId(idIncrement++);
-
-        Battle finishedBattleAC = new Battle();
-        finishedBattleAC.setPlayerParties(List.of(playerPartyA, playerPartyC));
-        finishedBattleAC.setFinished(true);
-        finishedBattleAC.setWinner(null);
-        finishedBattleAC.setId(idIncrement++);
-
-        return Stream.of(
-                Arguments.of("There is no active battle with player", userA, List.of(battleBC, finishedBattleAC), List.of()),
-                Arguments.of("There is one battle with player", userA, List.of(battleAC, battleBC, finishedBattleAC), List.of(battleAC)));
-    }
-
     public static Stream<Arguments> prepareMatch() {
         Battle battleBC = new Battle();
         battleBC.setPlayerParties(List.of(playerPartyB, playerPartyC));
@@ -163,35 +102,13 @@ public class BattleMatcherTest {
         expectedBattleAC.setFinished(false);
         expectedBattleAC.setWinner(null);
 
-        MatchingResult matchingResult = new MatchingResult(userA, userC, expectedBattleAC);
+        MatchingResult matchingResult = new MatchingResult(userA, List.of(userC), expectedBattleAC);
 
         return Stream.of(
                 Arguments.of("There is no available players", userA, List.of(userA, userB, userC), List.of(battleAC, battleBC, finishedBattleAC), Optional.empty()),
                 Arguments.of("There is available player", userA, List.of(userA, userB, userC), List.of(finishedBattleAC, battleBD), Optional.of(matchingResult)));
     }
 
-    @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("createBattles")
-    public void testGetRandomPlayerWithoutBattles(String name, PlayerUser playerUser, List<PlayerUser> activeUsers, List<Battle> allBattles, Optional<PlayerUser> expectedPlayer) {
-        Mockito.when(battleRepository.findAll()).thenReturn(allBattles);
-        Mockito.when(activeUserProvider.getActivePlayers()).thenReturn(activeUsers);
-        Optional<PlayerUser> actualUser = battleMatcher.findRandomPlayerWithoutBattleExcluding(playerUser);
-        assert actualUser.equals(expectedPlayer);
-    }
-
-    @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("createBattlesForUser")
-    public void testGetBattlesByPlayer(String name, PlayerUser playerUser, List<Battle> allBattles, List<Battle> expectedList) {
-        List<Battle> actualList = battleMatcher.getBattlesByPlayer(allBattles, playerUser);
-        assert actualList.equals(expectedList);
-    }
-
-    @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("createActiveBattlesForUser")
-    public void testGetActiveBattlesByPlayer(String name, PlayerUser playerUser, List<Battle> allBattles, List<Battle> expectedList) {
-        List<Battle> actualList = battleMatcher.getActiveBattlesByPlayer(allBattles, playerUser);
-        assert actualList.equals(expectedList);
-    }
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("prepareMatch")
@@ -202,7 +119,7 @@ public class BattleMatcherTest {
         assert actualMatchingResult.isEmpty()==expectedMatchingResult.isEmpty();
         expectedMatchingResult.ifPresent(matchingResult -> assertAll(
                 () -> assertEquals(actualMatchingResult.get().getBattle(), matchingResult.getBattle()),
-                () -> assertEquals(actualMatchingResult.get().getMatchedPlayer(), matchingResult.getMatchedPlayer()),
+                () -> assertEquals(actualMatchingResult.get().getMatchedPlayers(), matchingResult.getMatchedPlayers()),
                 () -> assertEquals(actualMatchingResult.get().getInitPlayer(), matchingResult.getInitPlayer())
         ));
     }
