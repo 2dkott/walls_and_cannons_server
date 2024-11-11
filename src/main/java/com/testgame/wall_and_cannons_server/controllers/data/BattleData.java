@@ -2,11 +2,11 @@ package com.testgame.wall_and_cannons_server.controllers.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.testgame.wall_and_cannons_server.domain.Battle;
-import com.testgame.wall_and_cannons_server.domain.PlayerUser;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public class BattleData {
@@ -14,7 +14,7 @@ public class BattleData {
     public BattleData(Battle battle) {
         this.id = battle.getId();
         this.isFinished = battle.isFinished();
-        this.winnerId = battle.getWinner().getId();
+        this.winnerId = Objects.isNull(battle.getWinner()) ? null : battle.getWinner().getId();
         this.partyIds = battle.getPlayerParties().stream().map(playerParty -> playerParty.getPlayerUser().getId()).toList();
     }
 
