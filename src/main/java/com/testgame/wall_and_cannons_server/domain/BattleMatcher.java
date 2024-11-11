@@ -1,5 +1,7 @@
 package com.testgame.wall_and_cannons_server.domain;
 
+import com.testgame.wall_and_cannons_server.exceptions.FewSamePlayersInBattleException;
+import com.testgame.wall_and_cannons_server.exceptions.NoPlayerInBattleException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -20,7 +22,15 @@ public class BattleMatcher {
 
     public Optional<MatchingResult> match(PlayerUser playerUser) {
         log.info("Matching {} with another active player", playerUser);
-        Optional<PlayerUser> enemyPlayer = findRandomPlayerWithoutBattleExcluding(playerUser);
+
+        Optional<Battle> battleToJoin = checkMatch(playerUser);
+
+        if (battleToJoin.isPresent()) {
+            return Optional.of(new MatchingResult(playerUser, BattleHandler.getPlayersExcluding(playerUser, battleToJoin.get()), battleToJoin.get()));
+        }
+
+        Optional<PlayerUser> enemyPlayer = BattleHandler.findRandomPlayerWithoutBattleExcluding(playerUserProvider.get(),
+                battleListProvider.get(), playerUser);
 
         if (enemyPlayer.isPresent()) {
             log.info("{} player matched with initial {}}", enemyPlayer.get(), playerUser);
@@ -38,40 +48,25 @@ public class BattleMatcher {
             battle.setPlayerParties(List.of(playerParty, enemyPlayerParty));
             log.info("{} is created", battle);
 
-
-            return Optional.of(new MatchingResult(playerUser, enemyPlayer.get(), battle));
+            return Optional.of(new MatchingResult(playerUser, BattleHandler.getPlayersExcluding(playerUser, battle), battle));
         }
         log.info("There is no available active players fo initial {}}", playerUser);
         return Optional.empty();
     }
 
-    public List<Battle> getBattlesByPlayer(List<Battle> battleList, PlayerUser playerUser) {
-        log.info("Searching all battles for {}", playerUser);
-        return battleList.stream().filter(battle -> battle.isByPlayer(playerUser)).toList();
+    public Optional<Battle> checkMatch(PlayerUser playerUser) {
+        return BattleHandler.getActiveBattlesByPlayer(battleListProvider.get(), playerUser).stream()
+                .filter(battle -> isGoodToJoin(battle, playerUser)).findFirst();
     }
 
-    public List<Battle> getActiveBattlesByPlayer(List<Battle> battleList, PlayerUser playerUser) {
-        log.info("Searching only active battles for {}", playerUser);
-        return getBattlesByPlayer(battleList, playerUser).stream().filter(battle -> !battle.isFinished()).toList();
+    public boolean isGoodToJoin(Battle battle, PlayerUser playerUser) {
+        List<PlayerParty> parties = battle.getPlayerParties().stream().filter(party -> party.getPlayerUser().equals(playerUser)).toList();
+
+        if (parties.isEmpty()) throw new NoPlayerInBattleException(battle, playerUser);
+        if (parties.size() > 1) throw new FewSamePlayersInBattleException(battle, playerUser);
+
+        return !parties.get(0).isConfirmed();
     }
 
-    public Optional<PlayerUser> findRandomPlayerWithoutBattleExcluding(PlayerUser currentPlayer) {
-        log.info("Searching in active player list}");
-        List<PlayerUser> noBattlePlayers = playerUserProvider.get().stream()
-                .filter(player -> !player.equals(currentPlayer))
-                .filter(player -> getActiveBattlesByPlayer(battleListProvider.get(), player).isEmpty())
-                .toList();
 
-        if (noBattlePlayers.isEmpty()) {
-            log.info("There no unbusy active players}");
-            return Optional.empty();
-        }
-        log.info("There are unbusy active players: {}", noBattlePlayers);
-
-        Optional<PlayerUser> enemyPlayer = Optional.ofNullable(noBattlePlayers.get(new Random().nextInt(noBattlePlayers.size())));
-
-        enemyPlayer.ifPresent(enemy -> log.info("Random {} was found", enemy));
-
-        return enemyPlayer;
-    }
 }
