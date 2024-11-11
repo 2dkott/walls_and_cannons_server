@@ -37,6 +37,10 @@ public class Battle {
         return !playerParties.stream().filter(playerParty -> playerParty.getPlayerUser().equals(playerUser)).toList().isEmpty();
     }
 
+    public List<PlayerUser> getPlayerUsers() {
+        return playerParties.stream().map(PlayerParty::getPlayerUser).toList();
+    }
+
     @Override
     public String toString() {
         return "Battle [id=" + id + ", playerParties=" + playerParties + ", isFinished=" + isFinished + "]";
