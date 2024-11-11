@@ -2,16 +2,18 @@ package com.testgame.wall_and_cannons_server.domain;
 
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class MatchingResult {
 
     private final PlayerUser initPlayer;
-    private final PlayerUser matchedPlayer;
+    private final List<PlayerUser> matchedPlayers;
     private final Battle battle;
 
-    public MatchingResult(PlayerUser initPlayer, PlayerUser matchedPlayer, Battle battle) {
+    public MatchingResult(PlayerUser initPlayer, List<PlayerUser> matchedPlayer, Battle battle) {
         this.initPlayer = initPlayer;
-        this.matchedPlayer = matchedPlayer;
+        this.matchedPlayers = matchedPlayer;
         this.battle = battle;
     }
 }
