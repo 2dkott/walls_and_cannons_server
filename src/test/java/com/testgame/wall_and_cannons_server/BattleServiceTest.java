@@ -1,9 +1,11 @@
 package com.testgame.wall_and_cannons_server;
 
 import com.testgame.wall_and_cannons_server.domain.Battle;
+import com.testgame.wall_and_cannons_server.domain.BattleRound;
+import com.testgame.wall_and_cannons_server.domain.PlayerParty;
 import com.testgame.wall_and_cannons_server.domain.PlayerUser;
 import com.testgame.wall_and_cannons_server.persistance.BattleRepository;
-import com.testgame.wall_and_cannons_server.domain.PlayerParty;
+import com.testgame.wall_and_cannons_server.persistance.BattleRoundRepository;
 import com.testgame.wall_and_cannons_server.services.BattleService;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,14 +25,28 @@ public class BattleServiceTest {
     @Mock
     BattleRepository battleRepository;
 
+    @Mock
+    BattleRoundRepository battleRoundRepository;
+
     @InjectMocks
     BattleService battleService;
 
     private static Long idIncrement = 0L;
 
+    private static final PlayerUser userA = createPlayerUser();
+    private static final PlayerUser userB = createPlayerUser();
+    private static final PlayerUser userC = createPlayerUser();
+    private static final PlayerUser userD = createPlayerUser();
+
+    private static final PlayerParty playerPartyA = createPlayerParty(userA, true);
+    private static final PlayerParty playerPartyB = createPlayerParty(userB, false);
+    private static final PlayerParty playerPartyC = createPlayerParty(userC, false);
+    private static final PlayerParty playerPartyD = createPlayerParty(userD, false);
+    private static final PlayerParty playerPartyAUNC = createPlayerParty(userA, false);
+    private static final PlayerParty playerPartyAC = createPlayerParty(userA, true);
+
     private static PlayerParty createPlayerParty(PlayerUser playerUser, boolean isConfirmed) {
         PlayerParty playerParty = new PlayerParty();
-        playerParty.setId(idIncrement++);
         playerParty.setConfirmed(isConfirmed);
         playerParty.setPlayerUser(playerUser);
         return playerParty;
@@ -45,16 +62,6 @@ public class BattleServiceTest {
     }
 
     private static Stream<Arguments> createBattles() {
-        PlayerUser userA = createPlayerUser();
-        PlayerUser userB = createPlayerUser();
-        PlayerUser userC = createPlayerUser();
-
-        PlayerParty playerPartyAC = createPlayerParty(userA, true);
-        PlayerParty playerPartyAUNC = createPlayerParty(userA, false);
-        PlayerParty playerPartyB = createPlayerParty(userB, false);
-        PlayerParty playerPartyC = createPlayerParty(userC, false);
-
-
         Battle battle1UserA = new Battle();
         battle1UserA.setPlayerParties(List.of(playerPartyAC, playerPartyB, playerPartyC));
         battle1UserA.setFinished(true);
@@ -113,49 +120,37 @@ public class BattleServiceTest {
                 Arguments.of("There are no battle with player", userA, true, true, List.of(battleB), List.of()));
     }
 
-    private static Stream<Arguments> createActiveBattles() {
-        PlayerUser userA = createPlayerUser();
-        PlayerUser userB = createPlayerUser();
-        PlayerUser userC = createPlayerUser();
+    private static Stream<Arguments> findBattleRoundByBattleAndRoundNumber() {
+        Battle battleA = new Battle();
+        battleA.setPlayerParties(List.of(playerPartyAC, playerPartyB));
+        battleA.setFinished(false);
+        battleA.setWinner(null);
 
-        PlayerParty playerPartyAC = createPlayerParty(userA, true);
-        PlayerParty playerPartyAUNC = createPlayerParty(userA, false);
-        PlayerParty playerPartyB = createPlayerParty(userB, false);
-        PlayerParty playerPartyC = createPlayerParty(userC, false);
+        BattleRound battleARoundA1 = new BattleRound();
+        battleARoundA1.setRoundNumber(0);
+        battleARoundA1.setBattle(battleA);
+        battleARoundA1.setActive(true);
 
-        Battle activeBattleAForUserA = new Battle();
-        activeBattleAForUserA.setPlayerParties(List.of(playerPartyAC, playerPartyB, playerPartyC));
-        activeBattleAForUserA.setFinished(false);
-        activeBattleAForUserA.setWinner(null);
-        activeBattleAForUserA.setId(idIncrement++);
+        BattleRound battleRoundB1 = new BattleRound();
+        battleRoundB1.setRoundNumber(0);
+        battleRoundB1.setBattle(battleA);
+        battleRoundB1.setActive(false);
 
-        Battle activeBattleBForUserA = new Battle();
-        activeBattleBForUserA.setPlayerParties(List.of(playerPartyAUNC, playerPartyB, playerPartyC));
-        activeBattleBForUserA.setFinished(false);
-        activeBattleBForUserA.setWinner(null);
-        activeBattleBForUserA.setId(idIncrement++);
-
-        Battle finishedBattleForUserA = new Battle();
-        finishedBattleForUserA.setPlayerParties(List.of(playerPartyAUNC, playerPartyB, playerPartyC));
-        finishedBattleForUserA.setFinished(true);
-        finishedBattleForUserA.setWinner(null);
-        finishedBattleForUserA.setId(idIncrement++);
-
-        Battle activeBattleWithoutUserA = new Battle();
-        activeBattleWithoutUserA.setPlayerParties(List.of(playerPartyB, playerPartyC));
-        activeBattleWithoutUserA.setFinished(false);
-        activeBattleWithoutUserA.setWinner(null);
-        activeBattleWithoutUserA.setId(idIncrement++);
+        BattleRound battleRoundB2 = new BattleRound();
+        battleRoundB2.setRoundNumber(1);
+        battleRoundB2.setBattle(battleA);
+        battleRoundB2.setActive(false);
 
         return Stream.of(
-                Arguments.of("There is one active battle with player",
-                        userA,
-                        List.of(activeBattleAForUserA, finishedBattleForUserA, activeBattleWithoutUserA),
-                        List.of(activeBattleAForUserA)),
-                Arguments.of("There is finished battle with player",
-                        userA,
-                        List.of(finishedBattleForUserA, activeBattleWithoutUserA),
-                        List.of()));
+                Arguments.of("There is one active battle round with 0 round number",
+                        battleA,
+                        0,
+                        Optional.of(battleARoundA1)),
+                Arguments.of("There is one active battle round with 0 round number",
+                        battleA,
+                        1,
+                        Optional.of(battleARoundA1))
+        );
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -166,10 +161,11 @@ public class BattleServiceTest {
     }
 
     @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("createActiveBattles")
-    public void testFindActiveBattleByPlayer(String name, PlayerUser playerUser, List<Battle> allBattles, List<Battle> expectedBattles) {
-        Mockito.when(battleRepository.findAll()).thenReturn(allBattles);
-        assert expectedBattles.equals(battleService.getActiveBattlesByPlayer(playerUser));
+    @MethodSource("findBattleRoundByBattleAndRoundNumber")
+    public void fineBattleRoundByBattleAndRoundNumber(String name, Battle battle, int round, Optional<BattleRound> expectedBattleRound) {
+        Mockito.when(battleRoundRepository.findBattleRoundByBattleAndRoundNumber(battle, round)).thenReturn(expectedBattleRound);
+        Optional<BattleRound> actualBattleRound = battleService.findBattleRoundByBattleAndRoundNumber(battle, round);
+        assert actualBattleRound.equals(expectedBattleRound);
     }
 
 }
