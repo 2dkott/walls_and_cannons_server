@@ -12,6 +12,7 @@ import com.testgame.wall_and_cannons_server.domain.PlayerParty;
 import com.testgame.wall_and_cannons_server.domain.PlayerUser;
 import com.testgame.wall_and_cannons_server.exceptions.NoBattleFoundException;
 import com.testgame.wall_and_cannons_server.exceptions.NoMatchingResultException;
+import com.testgame.wall_and_cannons_server.exceptions.NoRoundsForBattleException;
 import com.testgame.wall_and_cannons_server.exceptions.NoUserFoundException;
 import com.testgame.wall_and_cannons_server.services.ActiveUserProvider;
 import com.testgame.wall_and_cannons_server.services.BattleService;
@@ -67,9 +68,14 @@ public class BattleController {
     @GetMapping("/get-round")
     public void getRound(@RequestParam(name = "round") int roundNumber, @RequestParam(name = "playerId") long playerId, @RequestParam(name = "battleId") long battleId) {
         Battle battle = battleService.findBattleById(battleId).orElseThrow(() -> new NoBattleFoundException(battleId));
+
         List<BattleRound> battleRoundList = battleService.findBattleRoundsByBattle(battle);
-        if (battleRoundList.isEmpty())
-        Optional<BattleRound> battleRound = battleService.findBattleRoundByBattleAndRoundNumber(battle, roundNumber);
+
+        if (battleRoundList.isEmpty()) throw new NoRoundsForBattleException(battle);
+
+
+
+
     }
 
     @GetMapping("/confirm/{battleId}")
@@ -77,18 +83,25 @@ public class BattleController {
         Battle battle = battleService.findBattleById(battleId).orElseThrow(() -> new NoBattleFoundException(battleId));
 
         boolean isBattleConfirmed = battle.getPlayerParties().stream().anyMatch(playerParty -> !playerParty.isConfirmed());
-
         if (isBattleConfirmed) {
-            BattleRoundData
+           BattleRound battleRound = new BattleRound();
+           battleRound.setBattle(battle);
+           battleRound.setRoundNumber(0);
+           battleRound.setActive(true);
+           battleRound.setPlayerParties(battle.getPlayerParties().stream().map(playerParty -> {
+               PlayerParty party = new PlayerParty();
+               party.setConfirmed(false);
+               party.setBattleRound(battleRound);
+               party.setPlayerUser(playerParty.getPlayerUser());
+               return party;
+           }).toList());
+
         }
+
         ConfirmationData confirmationData = new ConfirmationData();
         confirmationData.setConfirmationType(ConfirmationType.BATTLE);
         confirmationData.setId(battleId);
-        if () {
-            confirmationData.setConfirmed(true);
-
-        }
-
+        confirmationData.setConfirmed(isBattleConfirmed);
 
         return new ResponseEntity<>(confirmationData, headers, HttpStatus.OK);
     }
