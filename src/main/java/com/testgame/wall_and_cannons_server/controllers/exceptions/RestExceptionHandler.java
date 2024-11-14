@@ -1,6 +1,7 @@
 package com.testgame.wall_and_cannons_server.controllers.exceptions;
 
 import com.testgame.wall_and_cannons_server.exceptions.NoBattleCreatedException;
+import com.testgame.wall_and_cannons_server.exceptions.NoBattleFoundException;
 import com.testgame.wall_and_cannons_server.exceptions.NoMatchingResultException;
 import com.testgame.wall_and_cannons_server.exceptions.NoUserFoundException;
 import com.testgame.wall_and_cannons_server.services.PlayerHasNoCurrentCastle;
@@ -27,6 +28,11 @@ public class RestExceptionHandler {
 
     @ExceptionHandler({NoMatchingResultException.class})
     public ResponseEntity<Object> handleNoMatchingResultException(Exception ex) {
+        return notFoundException(ex);
+    }
+
+    @ExceptionHandler({NoBattleFoundException.class})
+    public ResponseEntity<Object> handleNoBattleFoundException(Exception ex) {
         return notFoundException(ex);
     }
 
