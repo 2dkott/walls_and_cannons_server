@@ -55,7 +55,7 @@ public class BattleService {
         return battleRoundRepository.findBattleRoundByBattleAndRoundNumber(battle, roundNumber);
     }
 
-    public List<BattleRound> findBattleRoundsByBattle(Battle battle, int roundNumber) {
+    public List<BattleRound> findBattleRoundsByBattle(Battle battle) {
         return battleRoundRepository.findAllByBattle(battle);
     }
 }
