@@ -15,11 +15,21 @@ public class BattleRound {
     @Column(nullable = false)
     private Long id;
 
+    @Column
+    private int roundNumber;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "Battle_id", nullable = false)
     private Battle battle;
 
     @Column
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "battleRound")
-    private List<BattleRoundCell> battleRoundCells;
+    private List<RoundCell> roundCells;
+
+    @Column
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "round")
+    private List<PlayerParty> playerParties;
+
+    @Column
+    private boolean isActive;
 }
