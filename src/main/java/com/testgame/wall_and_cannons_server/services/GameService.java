@@ -57,8 +57,9 @@ public class GameService {
     }
 
     public Battle createBattle(Battle battle) {
-        battle = battleService.saveBattle(battle);
+        Battle finalBattle = battleService.saveBattle(battle);
         battle.getPlayerParties().forEach(playerParty -> {
+            playerParty.setBattle(finalBattle);
             playerPartyService.save(playerParty);
         });
         return battle;
