@@ -21,6 +21,10 @@ public class RoundCell {
     @JoinColumn(name = "cell_id", nullable = false)
     private Cell cell;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "player_party_id", nullable = false)
+    private PlayerParty playerParty;
+
     @Column
     private CellState state;
 
