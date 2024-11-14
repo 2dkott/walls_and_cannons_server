@@ -23,8 +23,8 @@ public class Battle {
     @Column
     public boolean isFinished;
 
-    @OneToOne()
-    @JoinColumn(unique = true, nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "PlayerUser_id")
     private PlayerUser winner;
 
     public Optional<PlayerParty> getPartyByPlayer(PlayerUser playerUser) {
