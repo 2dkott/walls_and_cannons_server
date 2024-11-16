@@ -3,6 +3,7 @@ package com.testgame.wall_and_cannons_server.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -32,4 +33,10 @@ public class BattleRound {
 
     @Column
     private boolean isActive;
+
+    @Column
+    private LocalDateTime roundStartTime;
+
+    @Column
+    private int roundDuration;
 }
