@@ -1,10 +1,6 @@
 package com.testgame.wall_and_cannons_server.controllers.exceptions;
 
-import com.testgame.wall_and_cannons_server.exceptions.NoBattleCreatedException;
-import com.testgame.wall_and_cannons_server.exceptions.NoBattleFoundException;
-import com.testgame.wall_and_cannons_server.exceptions.NoMatchingResultException;
-import com.testgame.wall_and_cannons_server.exceptions.NoRoundsForBattleException;
-import com.testgame.wall_and_cannons_server.exceptions.NoUserFoundException;
+import com.testgame.wall_and_cannons_server.exceptions.*;
 import com.testgame.wall_and_cannons_server.services.PlayerHasNoCurrentCastle;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +41,20 @@ public class RestExceptionHandler {
     @ExceptionHandler({NoBattleCreatedException.class})
     public ResponseEntity<Object> handleNoBattleCreatedException(Exception ex) {
         return notCreatedException(ex);
+    }
+
+    @ExceptionHandler({RoundNumberIncorrectException.class})
+    public ResponseEntity<Object> handleRoundNumberIncorrectException(Exception ex) {
+        return notCreatedException(ex);
+    }
+
+    @ExceptionHandler({RoundNotEndedException.class})
+    public ResponseEntity<Object> handleRoundNotEndedException(Exception ex) {
+        return tooFastRequestException(ex);
+    }
+
+    private ResponseEntity<Object> tooFastRequestException(Exception ex) {
+        return badRequestException(ex, HttpStatus.TOO_EARLY);
     }
 
     private ResponseEntity<Object> notFoundException(Exception ex) {
