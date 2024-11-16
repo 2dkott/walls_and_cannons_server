@@ -4,16 +4,8 @@ import com.testgame.wall_and_cannons_server.controllers.data.BattleData;
 import com.testgame.wall_and_cannons_server.controllers.data.BattleRoundData;
 import com.testgame.wall_and_cannons_server.controllers.data.ConfirmationData;
 import com.testgame.wall_and_cannons_server.controllers.data.ConfirmationType;
-import com.testgame.wall_and_cannons_server.domain.Battle;
-import com.testgame.wall_and_cannons_server.domain.BattleMatcher;
-import com.testgame.wall_and_cannons_server.domain.BattleRound;
-import com.testgame.wall_and_cannons_server.domain.MatchingResult;
-import com.testgame.wall_and_cannons_server.domain.PlayerParty;
-import com.testgame.wall_and_cannons_server.domain.PlayerUser;
-import com.testgame.wall_and_cannons_server.exceptions.NoBattleFoundException;
-import com.testgame.wall_and_cannons_server.exceptions.NoMatchingResultException;
-import com.testgame.wall_and_cannons_server.exceptions.NoRoundsForBattleException;
-import com.testgame.wall_and_cannons_server.exceptions.NoUserFoundException;
+import com.testgame.wall_and_cannons_server.domain.*;
+import com.testgame.wall_and_cannons_server.exceptions.*;
 import com.testgame.wall_and_cannons_server.services.ActiveUserProvider;
 import com.testgame.wall_and_cannons_server.services.BattleService;
 import com.testgame.wall_and_cannons_server.services.GameService;
@@ -32,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,15 +60,42 @@ public class BattleController {
     }
 
     @GetMapping("/get-round")
-    public void getRound(@RequestParam(name = "round") int roundNumber, @RequestParam(name = "playerId") long playerId, @RequestParam(name = "battleId") long battleId) {
+    public void getRound(@RequestParam(name = "round") int roundNumber, @RequestParam(name = "playerId") long playerId,
+                         @RequestParam(name = "battleId") long battleId) {
         Battle battle = battleService.findBattleById(battleId).orElseThrow(() -> new NoBattleFoundException(battleId));
 
         List<BattleRound> battleRoundList = battleService.findBattleRoundsByBattle(battle);
 
         if (battleRoundList.isEmpty()) throw new NoRoundsForBattleException(battle);
 
+        Optional<BattleRound> battleRound = battleRoundList.stream().filter(round -> round.getRoundNumber() == roundNumber).findFirst();
 
+        if (battleRound.isEmpty()) {
+            checkBattleRound(roundNumber, battleRoundList);
+        }
+        if (battleRound.isPresent()) {
 
+        }
+
+    }
+
+    public Optional<BattleRound> checkBattleRound(int roundNumber, List<BattleRound> battleRoundList) throws RoundNumberIncorrectException, RoundNotEndedException {
+
+        BattleRound prevRound = battleRoundList.stream().filter(round -> round.getRoundNumber() == roundNumber-1
+                && round.isActive()).findFirst().orElseThrow(() -> new RoundNumberIncorrectException(roundNumber));
+        Duration timePass = Duration.between(prevRound.getRoundStartTime(), LocalDateTime.now());
+
+        long delta = timePass.getSeconds() - prevRound.getRoundDuration();
+
+        if(delta<0) throw new RoundNotEndedException(prevRound.getRoundNumber());
+
+        if (delta < BattleConsts.ROUND_SECONDS_TIMEOUT) {
+            BattleRound newRound = new BattleRound();
+            newRound.setRoundNumber(roundNumber);
+            newRound.setActive(true);
+            newRound.setRoundStartTime(LocalDateTime.now());
+            return Optional.of(prevRound);
+        }
 
     }
 
