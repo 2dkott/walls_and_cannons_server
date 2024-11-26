@@ -43,6 +43,11 @@ public class RestExceptionHandler {
         return notCreatedException(ex);
     }
 
+    @ExceptionHandler({NoPlayerInRoundException.class})
+    public ResponseEntity<Object> handleNoPlayerInRoundException(Exception ex) {
+        return notCreatedException(ex);
+    }
+
     @ExceptionHandler({RoundNumberIncorrectException.class})
     public ResponseEntity<Object> handleRoundNumberIncorrectException(Exception ex) {
         return notCreatedException(ex);
