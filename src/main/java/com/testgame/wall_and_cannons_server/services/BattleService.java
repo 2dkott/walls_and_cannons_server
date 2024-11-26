@@ -5,11 +5,10 @@ import com.testgame.wall_and_cannons_server.domain.BattleRound;
 import com.testgame.wall_and_cannons_server.domain.PlayerUser;
 import com.testgame.wall_and_cannons_server.persistance.BattleRepository;
 import com.testgame.wall_and_cannons_server.persistance.BattleRoundRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class BattleService {
@@ -51,6 +50,10 @@ public class BattleService {
         return battleRepository.save(battle);
     }
 
+  public BattleRound saveBattleRound(BattleRound battleRound) {
+    return battleRoundRepository.save(battleRound);
+  }
+
     public Optional<BattleRound> findBattleRoundByBattleAndRoundNumber(Battle battle, int roundNumber) {
         return battleRoundRepository.findBattleRoundByBattleAndRoundNumber(battle, roundNumber);
     }
@@ -58,4 +61,8 @@ public class BattleService {
     public List<BattleRound> findBattleRoundsByBattle(Battle battle) {
         return battleRoundRepository.findAllByBattle(battle);
     }
+
+  public List<BattleRound> findAllBattleRounds() {
+    return battleRoundRepository.findAll();
+  }
 }
