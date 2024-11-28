@@ -110,21 +110,30 @@ public class BattleProcessor {
   }
 
   public List<PlayerParty> getNotConfirmedPartiesFromRound(BattleRound round) {
-    return round.getPlayerParties().stream()
+    log.info("Searching parties which are not confirmed round {} yet", round);
+    List<PlayerParty> parties = round.getPlayerParties().stream()
         .filter(playerParty -> !playerParty.isConfirmed())
         .toList();
+
+    log.info("Found {} parties", parties);
+    return parties;
   }
 
-  private BattleRound getLatestRound() {
-    log.info("Searching for latest round");
-    return getRoundsByBattle().stream()
+  public BattleRound getLatestRound() {
+    log.info("Getting latest round of battle {}", battle);
+    BattleRound latestBattleRound = getRoundsByBattle().stream()
         .max(Comparator.comparing(BattleRound::getRoundNumber))
         .orElseThrow(() -> new NoRoundsForBattleException(battle));
+    log.info("Latest battle round {}", latestBattleRound);
+    return latestBattleRound;
   }
 
   public List<BattleRound> getRoundsByBattle() {
-    return allBattleRoundsSupplier.get().stream()
+    log.info("Retrieving all rounds of battle {}", battle);
+    List<BattleRound> battleRoundList = allBattleRoundsSupplier.get().stream()
         .filter(battleRound -> battleRound.getBattle().equals(battle))
         .toList();
+    log.info("Thera are rounds {} of {}", battleRoundList, battle);
+    return battleRoundList;
   }
 }
