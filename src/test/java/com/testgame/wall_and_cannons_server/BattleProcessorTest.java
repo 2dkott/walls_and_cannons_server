@@ -9,48 +9,23 @@ import com.testgame.wall_and_cannons_server.domain.BattleRound;
 import com.testgame.wall_and_cannons_server.domain.PlayerParty;
 import com.testgame.wall_and_cannons_server.domain.PlayerUser;
 import com.testgame.wall_and_cannons_server.exceptions.NoRoundsForBattleException;
-import com.testgame.wall_and_cannons_server.persistance.BattleRepository;
-import com.testgame.wall_and_cannons_server.persistance.BattleRoundRepository;
-import com.testgame.wall_and_cannons_server.persistance.PlayerPartyRepository;
-import com.testgame.wall_and_cannons_server.services.BattleService;
-import com.testgame.wall_and_cannons_server.services.PlayerPartyService;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
 public class BattleProcessorTest {
 
-    @Mock
-    private BattleRepository battleRepository;
-
-    @Mock
-    private BattleRoundRepository battleRoundRepository;
-
-    @Mock
-    private BattleService battleService;
-
-    @Mock
-    PlayerPartyRepository playerPartyRepository;
-
-    @Mock
-    PlayerPartyService playerPartyService;
-    @Mock
-    private Supplier<List<BattleRound>> battleRoundSupplier;
-    @Mock
-    private Consumer<BattleRound> battleRoundSaver;
-    @Mock
-    private Consumer<PlayerParty> playerPartySaver;
+    private final Consumer<BattleRound> battleRoundSaver = (battleRound -> {});
+    private final Consumer<PlayerParty> playerPartySaver = (PlayerParty -> {});
 
     private static Long idIncrement = 0L;
 
@@ -60,9 +35,11 @@ public class BattleProcessorTest {
     private static final PlayerUser userD = createPlayerUser();
 
     private static final PlayerParty playerPartyA = createPlayerParty(userA, true);
-    private static final PlayerParty playerPartyB = createPlayerParty(userB, false);
-    private static final PlayerParty playerPartyC = createPlayerParty(userC, false);
-    private static final PlayerParty playerPartyD = createPlayerParty(userD, false);
+    private static final PlayerParty playerPartyANotCnfrmd = createPlayerParty(userA, false);
+    private static final PlayerParty playerPartyB = createPlayerParty(userB, true);
+    private static final PlayerParty playerPartyBNotCnfrmd = createPlayerParty(userB, false);
+    private static final PlayerParty playerPartyC = createPlayerParty(userC, true);
+    private static final PlayerParty playerPartyD = createPlayerParty(userD, true);
 
     private static PlayerParty createPlayerParty(PlayerUser playerUser, boolean isConfirmed) {
         PlayerParty playerParty = new PlayerParty();
@@ -173,9 +150,54 @@ public class BattleProcessorTest {
                         battleRoundBC1));
     }
 
+    public static Stream<Arguments> getBattleRoundsForConfirmation() {
+        Battle battle = new Battle();
+        battle.setPlayerParties(List.of(playerPartyA, playerPartyB));
+        battle.setFinished(false);
+        battle.setWinner(null);
+
+        BattleRound battleRoundANotCnfrmdB = new BattleRound();
+        battleRoundANotCnfrmdB.setRoundNumber(1);
+        battleRoundANotCnfrmdB.setActive(false);
+        battleRoundANotCnfrmdB.setPlayerParties(List.of(playerPartyANotCnfrmd, playerPartyB));
+        battleRoundANotCnfrmdB.setBattle(battle);
+
+        BattleRound battleRoundANotCnfrmdBNotCnfrmd = new BattleRound();
+        battleRoundANotCnfrmdBNotCnfrmd.setRoundNumber(1);
+        battleRoundANotCnfrmdBNotCnfrmd.setActive(false);
+        battleRoundANotCnfrmdBNotCnfrmd.setBattle(battle);
+        battleRoundANotCnfrmdBNotCnfrmd.setPlayerParties(
+                List.of(playerPartyANotCnfrmd, playerPartyBNotCnfrmd));
+
+        BattleRound battleRoundAB = new BattleRound();
+        battleRoundAB.setRoundNumber(1);
+        battleRoundAB.setActive(false);
+        battleRoundAB.setBattle(battle);
+        battleRoundAB.setPlayerParties(List.of(playerPartyA, playerPartyB));
+
+        return Stream.of(
+                Arguments.of(userA, battle, battleRoundANotCnfrmdB, List.of(playerPartyANotCnfrmd)),
+                Arguments.of(userB, battle, battleRoundANotCnfrmdB, List.of(playerPartyANotCnfrmd)),
+                Arguments.of(
+                        userA,
+                        battle,
+                        battleRoundANotCnfrmdBNotCnfrmd,
+                        List.of(playerPartyANotCnfrmd, playerPartyBNotCnfrmd)),
+                Arguments.of(
+                        userB,
+                        battle,
+                        battleRoundANotCnfrmdBNotCnfrmd,
+                        List.of(playerPartyANotCnfrmd, playerPartyBNotCnfrmd)),
+                Arguments.of(userA, battle, battleRoundAB, List.of()));
+    }
+
     @ParameterizedTest
     @MethodSource("getBattleRounds")
-    public void testGetRoundsByBattle(PlayerUser playerUser, Battle battle, List<BattleRound> allRounds, List<BattleRound> expectedRounds) {
+    public void testGetRoundsByBattle(
+            PlayerUser playerUser,
+            Battle battle,
+            List<BattleRound> allRounds,
+            List<BattleRound> expectedRounds) {
         BattleProcessor battleProcessor =
                 new BattleProcessor(
                         playerUser, battle, () -> allRounds, battleRoundSaver, playerPartySaver);
@@ -226,15 +248,21 @@ public class BattleProcessorTest {
                 .isInstanceOf(NoRoundsForBattleException.class);
     }
 
-    public static BattleRound createBattleRound(List<PlayerParty> parties, Battle battle, int roundNumber, boolean isActive) {
-        BattleRound battleRound = new BattleRound();
-        battleRound.setId(idIncrement++);
-        battleRound.setPlayerParties(parties);
-        battleRound.setBattle(battle);
-        battleRound.setRoundNumber(roundNumber);
-        battleRound.setActive(isActive);
-        return battleRound;
+    @ParameterizedTest
+    @MethodSource("getBattleRoundsForConfirmation")
+    public void testGetNotConfirmedPartiesFromRound(
+            PlayerUser user,
+            Battle battle,
+            BattleRound battleRound,
+            List<PlayerParty> expectedParties) {
+        BattleProcessor battleProcessor =
+                new BattleProcessor(
+                        user,
+                        battle,
+                        () -> List.of(battleRound),
+                        battleRoundSaver,
+                        playerPartySaver);
+        List<PlayerParty> actualPlayerParties = battleProcessor.getNotConfirmedPartiesFromRound(battleRound);
+        assertThat(actualPlayerParties).isEqualTo(expectedParties);
     }
-
-
 }
