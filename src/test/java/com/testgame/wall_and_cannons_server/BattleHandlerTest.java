@@ -4,6 +4,7 @@ import com.testgame.wall_and_cannons_server.domain.Battle;
 import com.testgame.wall_and_cannons_server.domain.BattleHandler;
 import com.testgame.wall_and_cannons_server.domain.PlayerParty;
 import com.testgame.wall_and_cannons_server.domain.PlayerUser;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -59,7 +60,25 @@ public class BattleHandlerTest {
         battleBD.setWinner(null);
         battleBD.setId(idIncrement++);
 
-        return Stream.of(Arguments.of("There is no active battle with player", userA, List.of(userA, userB, userC, userD), List.of(battleBC), Optional.of(userD)), Arguments.of("There is one finished battle with player", userA, List.of(userA, userB, userC, userD), List.of(battleBC, battleBD), Optional.of(userD)), Arguments.of("There is one finished battle with player", userA, List.of(userA, userB, userC), List.of(battleBC), Optional.empty()));
+        return Stream.of(
+                Arguments.of(
+                        "There is no active battle with player",
+                        userA,
+                        List.of(userA, userB, userC, userD),
+                        List.of(battleBC),
+                        Optional.of(userD)),
+                Arguments.of(
+                        "There is one finished battle with player",
+                        userA,
+                        List.of(userA, userB, userC, userD),
+                        List.of(battleBC, battleBD),
+                        Optional.of(userD)),
+                Arguments.of(
+                        "There is one finished battle with player",
+                        userA,
+                        List.of(userA, userB, userC),
+                        List.of(battleBC),
+                        Optional.empty()));
     }
 
     public static Stream<Arguments> createBattlesForUser() {
@@ -75,7 +94,13 @@ public class BattleHandlerTest {
         battleAC.setWinner(null);
         battleAC.setId(idIncrement++);
 
-        return Stream.of(Arguments.of("There is no battle with player", userA, List.of(battleBC), List.of()), Arguments.of("There is one battle with player", userA, List.of(battleAC, battleBC), List.of(battleAC)));
+        return Stream.of(
+                Arguments.of("There is no battle with player", userA, List.of(battleBC), List.of()),
+                Arguments.of(
+                        "There is one battle with player",
+                        userA,
+                        List.of(battleAC, battleBC),
+                        List.of(battleAC)));
     }
 
     public static Stream<Arguments> createActiveBattlesForUser() {
@@ -97,7 +122,17 @@ public class BattleHandlerTest {
         finishedBattleAC.setWinner(null);
         finishedBattleAC.setId(idIncrement++);
 
-        return Stream.of(Arguments.of("There is no active battle with player", userA, List.of(battleBC, finishedBattleAC), List.of()), Arguments.of("There is one battle with player", userA, List.of(battleAC, battleBC, finishedBattleAC), List.of(battleAC)));
+        return Stream.of(
+                Arguments.of(
+                        "There is no active battle with player",
+                        userA,
+                        List.of(battleBC, finishedBattleAC),
+                        List.of()),
+                Arguments.of(
+                        "There is one battle with player",
+                        userA,
+                        List.of(battleAC, battleBC, finishedBattleAC),
+                        List.of(battleAC)));
     }
 
 
