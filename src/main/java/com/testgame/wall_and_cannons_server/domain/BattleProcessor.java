@@ -1,5 +1,6 @@
 package com.testgame.wall_and_cannons_server.domain;
 
+import com.testgame.wall_and_cannons_server.exceptions.BattleRoundDurationException;
 import com.testgame.wall_and_cannons_server.exceptions.NoRoundsForBattleException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -45,6 +46,7 @@ public class BattleProcessor {
         return Optional.of(latestBattleRound);
       }
     }
+    log.info("There NO current round which is equal/active requested round number {}. Latest round is {}", roundNumber, latestBattleRound);
     return Optional.empty();
   }
 
@@ -94,6 +96,7 @@ public class BattleProcessor {
 
   public boolean isStillInFineTimeout(BattleRound currentBattleRound) {
     log.info("Check if requested round still in allowed timeout");
+    try{
     Duration timePassAfterRoundStarts =
         Duration.between(currentBattleRound.getRoundStartTime(), LocalDateTime.now());
     log.info(
@@ -107,6 +110,9 @@ public class BattleProcessor {
     }
     log.info("Requested round is not in allowed timeout");
     return false;
+    } catch (Exception e) {
+      throw new BattleRoundDurationException(currentBattleRound, e.getMessage());
+    }
   }
 
   public List<PlayerParty> getNotConfirmedPartiesFromRound(BattleRound round) {

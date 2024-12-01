@@ -2,6 +2,7 @@ package com.testgame.wall_and_cannons_server.controllers.exceptions;
 
 import com.testgame.wall_and_cannons_server.exceptions.*;
 import com.testgame.wall_and_cannons_server.services.PlayerHasNoCurrentCastle;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -58,6 +59,11 @@ public class RestExceptionHandler {
         return tooFastRequestException(ex);
     }
 
+    @ExceptionHandler({BattleRoundDurationException.class})
+    public ResponseEntity<Object> handleBattleRoundDurationException(Exception ex) {
+        return internalServerException(ex);
+    }
+
     private ResponseEntity<Object> tooFastRequestException(Exception ex) {
         return badRequestException(ex, HttpStatus.TOO_EARLY);
     }
@@ -68,6 +74,10 @@ public class RestExceptionHandler {
 
     private ResponseEntity<Object> notCreatedException(Exception ex) {
         return badRequestException(ex, HttpStatus.NO_CONTENT);
+    }
+
+    private ResponseEntity<Object> internalServerException(Exception ex) {
+        return badRequestException(ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<Object> badRequestException(Exception ex, HttpStatus status) {
