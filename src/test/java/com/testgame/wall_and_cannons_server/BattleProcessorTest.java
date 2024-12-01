@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -191,6 +192,58 @@ public class BattleProcessorTest {
                 Arguments.of(userA, battle, battleRoundAB, List.of()));
     }
 
+    public static Stream<Arguments> getRoundForDurationTest() {
+
+        Battle battle = new Battle();
+
+        BattleRound battleRoundA = new BattleRound();
+        battleRoundA.setRoundNumber(0);
+        battleRoundA.setActive(false);
+        battleRoundA.setBattle(battle);
+        battleRoundA.setPlayerParties(List.of(playerPartyA, playerPartyB));
+        battleRoundA.setRoundStartTime(LocalDateTime.now());
+        battleRoundA.setRoundDuration(60);
+
+        BattleRound battleRoundB = new BattleRound();
+        battleRoundB.setRoundNumber(0);
+        battleRoundB.setActive(false);
+        battleRoundB.setBattle(battle);
+        battleRoundB.setPlayerParties(List.of(playerPartyA, playerPartyB));
+        battleRoundB.setRoundStartTime(LocalDateTime.now().minusSeconds(30));
+        battleRoundB.setRoundDuration(60);
+
+        BattleRound battleRoundC = new BattleRound();
+        battleRoundC.setRoundNumber(0);
+        battleRoundC.setActive(false);
+        battleRoundC.setBattle(battle);
+        battleRoundC.setPlayerParties(List.of(playerPartyA, playerPartyB));
+        battleRoundC.setRoundStartTime(LocalDateTime.now().minusSeconds(60));
+        battleRoundC.setRoundDuration(60);
+
+        BattleRound battleRoundD = new BattleRound();
+        battleRoundD.setRoundNumber(0);
+        battleRoundD.setActive(false);
+        battleRoundD.setBattle(battle);
+        battleRoundD.setPlayerParties(List.of(playerPartyA, playerPartyB));
+        battleRoundD.setRoundStartTime(LocalDateTime.now().minusSeconds(61));
+        battleRoundD.setRoundDuration(60);
+
+        BattleRound battleRoundE = new BattleRound();
+        battleRoundE.setRoundNumber(0);
+        battleRoundE.setActive(false);
+        battleRoundE.setBattle(battle);
+        battleRoundE.setPlayerParties(List.of(playerPartyA, playerPartyB));
+        battleRoundE.setRoundStartTime(LocalDateTime.now().minusSeconds(500));
+        battleRoundE.setRoundDuration(60);
+
+        return Stream.of(
+                Arguments.of(userA, battle, battleRoundA, true),
+                Arguments.of(userA, battle, battleRoundB, true),
+                Arguments.of(userA, battle, battleRoundC, true),
+                Arguments.of(userA, battle, battleRoundD, false),
+                Arguments.of(userA, battle, battleRoundE, false));
+    }
+
     @ParameterizedTest
     @MethodSource("getBattleRounds")
     public void testGetRoundsByBattle(
@@ -264,5 +317,19 @@ public class BattleProcessorTest {
                         playerPartySaver);
         List<PlayerParty> actualPlayerParties = battleProcessor.getNotConfirmedPartiesFromRound(battleRound);
         assertThat(actualPlayerParties).isEqualTo(expectedParties);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRoundForDurationTest")
+    public void testIsStillInFineTimeout(PlayerUser user, Battle battle, BattleRound battleRound, boolean expectedIsGood) {
+        BattleProcessor battleProcessor =
+                new BattleProcessor(
+                        user,
+                        battle,
+                        () -> List.of(battleRound),
+                        battleRoundSaver,
+                        playerPartySaver);
+        boolean actualIsGood = battleProcessor.isStillInFineTimeout(battleRound);
+        assertThat(actualIsGood).isEqualTo(expectedIsGood);
     }
 }
